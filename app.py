@@ -4,12 +4,10 @@ import pdfplumber
 from openai import OpenAI
 
 # ------------------------------
-# API Key Setup (Recommended: Streamlit Secrets)
+# API Key Setup (Streamlit Secrets)
 # ------------------------------
-# In production use:
-
-st.secrets["OPENAI_API_KEY"]
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+api_key = st.secrets["OPENAI_API_KEY"]
+client = OpenAI(api_key=api_key)
 
 # ------------------------------
 # Extract text from PDF
