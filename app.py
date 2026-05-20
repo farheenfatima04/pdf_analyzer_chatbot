@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 import pdfplumber
 from openai import OpenAI
@@ -36,11 +35,10 @@ if "pdf_text" not in st.session_state:
 def main():
     st.title("📄 PDF Chatbot with AI")
 
-    # Upload PDF
     uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
 
     if uploaded_file:
-        # Extract PDF text only once
+        # Extract text only once
         if not st.session_state.pdf_text:
             st.session_state.pdf_text = extract_text_from_pdf(uploaded_file)
 
@@ -50,36 +48,34 @@ def main():
 
             st.success("PDF loaded successfully! Start chatting below.")
 
-        # Display chat history
-        for message in st.session_state.messages:
-            if message["role"] == "user":
-                st.markdown(f"**You:** {message['content']}")
+        # Show chat history
+        for msg in st.session_state.messages:
+            if msg["role"] == "user":
+                st.markdown(f"**You:** {msg['content']}")
             else:
-                st.markdown(f"**AI:** {message['content']}")
+                st.markdown(f"**AI:** {msg['content']}")
 
         # User input
         user_input = st.text_input("Type your question here...")
 
-        # Send button
         if st.button("Send") and user_input:
             # Save user message
             st.session_state.messages.append(
                 {"role": "user", "content": user_input}
             )
 
-            # Prepare messages for OpenAI
+            # System prompt + chat history
             messages = [
                 {
                     "role": "system",
                     "content": (
-                        "You are a helpful assistant answering questions "
-                        "based only on the following PDF content:\n\n"
+                        "You are a helpful assistant. Answer ONLY based on this PDF content:\n\n"
                         f"{st.session_state.pdf_text}"
                     )
                 }
             ] + st.session_state.messages
 
-            # Get AI response
+            # OpenAI response
             try:
                 response = client.chat.completions.create(
                     model="gpt-3.5-turbo",
@@ -90,7 +86,6 @@ def main():
 
                 answer = response.choices[0].message.content
 
-                # Save assistant response
                 st.session_state.messages.append(
                     {"role": "assistant", "content": answer}
                 )
